@@ -33,14 +33,17 @@ function woocommerce_gpg_init() {
          $this->init_settings();
          $this->title            = $this->settings['title'];
          $this->description      = $this->settings['description'];
-         $this->login            = $this->settings['login_id'];
          $this->mode             = $this->settings['working_mode'];
          $this->client_id        = $this->settings['client_id'];
          $this->secret_key       = $this->settings['secret_key'];
+         $this->merchant_id      = $this->settings['merchant_id'];
+         $this->terminal_id      = $this->settings['terminal_id'];
          $this->success_message  = $this->settings['success_message'];
          $this->failed_message   = $this->settings['failed_message'];
          $this->liveurl          = 'https://gateway.givepaycommerce.com/';
-         $this->testurl          = 'https://gateway.flatratepay-staging.net';
+         $this->testurl          = 'https://gpg-stage.flatratepay-staging.net/';
+         $this->live_token_url   = 'https://portal.flatratepay.com/connect/token';
+         $this->test_token_url   = 'https://portal.flatratepay-staging.net/connect/token';
          $this->msg['message']   = "";
          $this->msg['class']     = "";
          
@@ -70,14 +73,22 @@ function woocommerce_gpg_init() {
                   'type'         => 'textarea',
                   'description'  => __('This controls the description which the user sees during checkout.', 'wc-givepay-gateway'),
                   'default'      => __('Pay securely by Credit or Debit Card through GivePay Secure Servers.', 'wc-givepay-gateway')),
-            'login_id'     => array(
-                  'title'        => __('Login ID', 'wc-givepay-gateway'),
+            'client_id' => array(
+                  'title'        => __('Client ID', 'wc-givepay-gateway'),
                   'type'         => 'text',
-                  'description'  => __('This is API Login ID')),
-            'transaction_key' => array(
-                  'title'        => __('Transaction Key', 'wc-givepay-gateway'),
+                  'description'  =>  __('The Client ID for the API', 'wc-givepay-gateway')),
+            'secret_key' => array(
+                  'title'        => __('Secret Key', 'wc-givepay-gateway'),
                   'type'         => 'text',
-                  'description'  =>  __('API Transaction Key', 'wc-givepay-gateway')),
+                  'description'  =>  __('The API Secret Key (ssshhhh...)', 'wc-givepay-gateway')),
+            'merchant_id' => array(
+                  'title'        => __('Merchant ID', 'wc-givepay-gateway'),
+                  'type'         => 'text',
+                  'description'  =>  __('Your merchant ID number', 'wc-givepay-gateway')),
+            'terminal_id' => array(
+                  'title'        => __('Terminal ID', 'wc-givepay-gateway'),
+                  'type'         => 'text',
+                  'description'  =>  __('Your website\'s terminal ID number', 'wc-givepay-gateway')),
             'success_message' => array(
                   'title'        => __('Transaction Success Message', 'wc-givepay-gateway'),
                   'type'         => 'textarea',
@@ -114,11 +125,13 @@ function woocommerce_gpg_init() {
       **/
       function payment_fields()
       {
-         if ( $this->description ) 
+         if ($this->description) {
             echo wpautop(wptexturize($this->description));
-            echo '<label style="margin-right:46px; line-height:40px;">Credit Card :</label> <input type="text" name="aim_credircard" /><br/>';
-            echo '<label style="margin-right:30px; line-height:40px;">Expiry (MMYY) :</label> <input type="text"  style="width:50px;" name="aim_ccexpdate" maxlength="4" /><br/>';
-            echo '<label style="margin-right:89px; line-height:40px;">CVV :</label> <input type="text" name="aim_ccvnumber"  maxlength=4 style="width:40px;" /><br/>';
+            echo '<label style="margin-right:46px; line-height:40px;">Credit Card :</label> <input type="text" name="gpg_pan" /><br/>';
+            echo '<label style="margin-right:30px; line-height:40px;">Expiry (MM YY) :</label> <input type="text" placeholder="MM" style="width:60px; display: inline;" name="gpg_exp_month" maxlength="2" />';
+            echo '<input type="text" style="width:60px; display: inline;" name="gpg_exp_year" maxlength="2" placeholder="YY" /><br/>';
+            echo '<label style="margin-right:89px; line-height:40px;">CVV :</label> <input type="text" name="gpg_cvv"  maxlength=4 style="width:60px;" /><br/>';
+          }
       }
       
       /*
@@ -126,13 +139,23 @@ function woocommerce_gpg_init() {
       */
       public function validate_fields()
       {
-           global $woocommerce;
-           if (!$this->isCreditCardNumber($_POST['aim_credircard'])) 
-               $woocommerce->add_error(__('(Credit Card Number) is not valid.', 'wc-givepay-gateway')); 
-           if (!$this->isCorrectExpireDate($_POST['aim_ccexpdate']))    
-               $woocommerce->add_error(__('(Card Expiry Date) is not valid.', 'wc-givepay-gateway')); 
-           if (!$this->isCCVNumber($_POST['aim_ccvnumber'])) 
-               $woocommerce->add_error(__('(Card Verification Number) is not valid.', 'wc-givepay-gateway')); 
+        global $woocommerce;
+
+        if (!$this->isCreditCardNumber($_POST['gpg_pan'])) {
+           $woocommerce->add_error(__('(Credit Card Number) is not valid.', 'wc-givepay-gateway')); 
+        }
+
+        if (!$this->isCorrectExpireDate($_POST['gpg_exp_year'])) {
+           $woocommerce->add_error(__('(Card Expiry Date) is not valid.', 'wc-givepay-gateway')); 
+        }  
+
+        if (!$this->isCorrectExpireDate($_POST['gpg_exp_month'])) {
+           $woocommerce->add_error(__('(Card Expiry Date) is not valid.', 'wc-givepay-gateway')); 
+        } 
+
+        if (!$this->isCCVNumber($_POST['gpg_cvv'])) {
+           $woocommerce->add_error(__('(Card Verification Number) is not valid.', 'wc-givepay-gateway')); 
+        }
       }
       
       /*
@@ -184,7 +207,7 @@ function woocommerce_gpg_init() {
       private function isCorrectExpireDate($date) 
       {
           
-         if (is_numeric($date) && (strlen($date) == 4)){
+         if (is_numeric($date) && (strlen($date) == 2)){
             return true;
          }
          return false;
@@ -210,105 +233,144 @@ function woocommerce_gpg_init() {
       **/
       function process_payment($order_id)
       {
-         global $woocommerce;
-         $order = new WC_Order($order_id);
-         if($this->mode == 'true'){
-           $process_url = $this->testurl;
-         }
-         else{
-           $process_url = $this->liveurl;
-         }
-         
-         $params = $this->generate_authorizeaim_params($order);
-         
-         $post_string = "";
-         foreach( $params as $key => $value ){ 
-            $post_string .= "$key=" . urlencode( $value ) . "&"; 
-         }
-         $post_string = rtrim( $post_string, "& " );
-         
-         $request = curl_init($process_url); // initiate curl object
-         curl_setopt($request, CURLOPT_HEADER, 0); // set to 0 to eliminate header info from response
-         curl_setopt($request, CURLOPT_RETURNTRANSFER, 1); // Returns response data instead of TRUE(1)
-         curl_setopt($request, CURLOPT_POSTFIELDS, $post_string); // use HTTP POST to send form data
-         curl_setopt($request, CURLOPT_SSL_VERIFYPEER, FALSE); // uncomment this line if you get no gateway response.
-         $post_response = curl_exec($request); // execute curl post and store results in $post_response
-         curl_close ($request);
-         
-           
-       $response_array = explode('|',$post_response);
-   
-      
-         if ( count($response_array) > 1 ){
-         
-            if($response_array[0] == '1' ){
-                if ($order->status != 'completed') {
-                    $order->payment_complete( $response_array[6]);
-                     $woocommerce->cart->empty_cart();
-                     $order->add_order_note($this->success_message. $response_array[3] . 'Transaction ID: '. $response_array[6] );
-                     unset($_SESSION['order_awaiting_payment']);
-                 }
-                  return array('result'   => 'success',
-                     'redirect'  => get_site_url().'/checkout/order-received/'.$order->id.'/?key='.$order->order_key );
-            }
-            else{
-            
-                $order->add_order_note($this->failed_message .$response_array[3] );
-                $woocommerce->add_error(__('(Transaction Error) '. $response_array[3], 'wc-givepay-gateway'));
-            }
+        global $woocommerce;
+        $order = new WC_Order($order_id);
+        if ($this->mode == 'true') {
+          $process_url = $this->testurl;
+          $token_url = $this->test_token_url;
+        } else {
+          $process_url = $this->liveurl;
+          $token_url = $this->live_token_url;
         }
-        else {
-            
-            $order->add_order_note($this->failed_message);
-            $order->update_status('failed');
-            
-            $woocommerce->add_error(__('(Transaction Error) Error processing payment.', 'wc-givepay-gateway')); 
+
+        $client_id = $this->client_id;
+        $secret = $this->secret_key;
+
+        $token = $this->get_oauth_token($token_url, $client_id, $secret);
+
+        $sale_request = $this->generate_gpg_sale_params($order);
+
+        $body = json_encode($sale_request);
+
+        write_log('Making SALE request to ' . $process_url);
+
+        $ch = curl_init(); // initiate curl object
+        curl_setopt($ch, CURLOPT_URL, $process_url . 'api/v1/transactions/sale');
+        curl_setopt($ch, CURLOPT_HEADER, false); // set to 0 to eliminate header info from response
+        curl_setopt($ch, CURLOPT_POST, true); 
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Returns response data instead of TRUE(1)
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $body); // use HTTP POST to send form data
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true); // uncomment this line if you get no gateway response.
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+          'Accept: application/json',
+          'Content-Type: application/json',
+          'Authorization: Bearer ' . $token,
+          'Content-Length: ' . strlen($body)
+        ));
+        $post_response = curl_exec($ch); // execute curl post and store results in $post_response
+        curl_close($ch);
+        write_log($post_response);
+        $sale_response = json_decode($post_response);
+
+        if ($sale_response->success) {
+          $transaction_id = $sale_response->result->transaction_id;
+
+          $order->reduce_order_stock();
+          $woocommerce->cart->empty_cart();
+
+          $order->add_order_note( __('FlatRatePay payment complete!', 'wc-givepay-gateway') );
+          $order->add_order_note( __('Transaction ID: ' . $transaction_id, 'wc-givepay-gateway') );
+
+          $order->payment_complete();
+
+          return array(
+            'result' => 'success',
+            'redirect' => $this->get_return_url( $order )
+          );
+        } else {
+          $order->add_order_note($this->failed_message);
+          $order->update_status('failed');
+
+          $woocommerce->add_error(__('(Transaction Error) Error processing payment.', 'wc-givepay-gateway')); 
         }
+      }
+
+      /**
+      * Retrieves a new OAuth Token from the OIDC Token endpoint
+      **/
+      public function get_oauth_token($token_url, $client_id, $client_secret)
+      {
+        $token_data = array(
+          'client_id' => $client_id,
+          'grant_type' => 'client_credentials',
+          'client_secret' => $client_secret,
+          'scope' => 'authorize:transactions capture:transactions sale:transactions refund:transactions void:transactions'
+        );
+
+        $body = "";
+        foreach ($token_data as $key => $value) { 
+           $body .= "$key=" . rawurlencode( $value ) . "&"; 
+        }
+        $body = rtrim( $body, "& " );
+
+        write_log('Making token request to ' . $token_url);
+
+        $ch = curl_init(); // initiate curl object
+
+        curl_setopt($ch, CURLOPT_HEADER, FALSE); // set to 0 to eliminate header info from response
+        curl_setopt($ch, CURLOPT_URL, $token_url);
+        curl_setopt($ch, CURLOPT_POST, true); 
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $body);      
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE); // Returns response data instead of TRUE(1)
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, TRUE); // uncomment this line if you get no gateway response.
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+          'Accept: application/json',
+          'Content-Length: ' . strlen($body)
+        ));
          
-         
-         
+        $token_response = curl_exec($ch); // execute curl post and store results in $post_response
+        write_log("Token request ended");
+        curl_close($ch);
+
+        $token = json_decode($token_response);
+        return $token->access_token;
       }
       
       /**
-      * Generate authorize.net AIM button link
+      * Generate a Sale request
       **/
-      public function generate_authorizeaim_params($order)
+      public function generate_gpg_sale_params($order)
       {
-         $authorizeaim_args = array(
-            'x_login'                  => $this->login,
-            'x_tran_key'               => $this->transaction_key,
-            'x_version'                => '3.1',
-            'x_delim_data'             => 'TRUE',
-            'x_delim_char'             => '|',
-            'x_relay_response'         => 'FALSE',
-            'x_type'                   => 'AUTH_CAPTURE',
-            'x_method'                 => 'CC',
-            'x_card_num'               => $_POST['aim_credircard'],
-            'x_exp_date'               => $_POST['aim_ccexpdate' ],
-            'x_description'            => 'Order #'.$order->id,
-            'x_amount'                 => $order->order_total,
-            'x_first_name'             => $order->billing_first_name ,
-            'x_last_name'              => $order->billing_last_name ,
-            'x_company'                => $order->billing_company ,
-            'x_address'                => $order->billing_address_1 .' '. $order->billing_address_2,
-            'x_country'                => $order->billing_country,
-            'x_phone'                  => $order->billing_phone,
-            'x_state'                  => $order->billing_state,
-            'x_city'                   => $order->billing_city,
-            'x_zip'                    => $order->billing_postcode,
-            'x_email'                  => $order->billing_email,
-            'x_card_code'              => $_POST['aim_cvvnumber'], 
-            'x_ship_to_first_name'     => $order->shipping_first_name,
-            'x_ship_to_last_name'      => $order->shipping_last_name,
-            'x_ship_to_address'        => $order->shipping_address_1,
-            'x_ship_to_city'           => $order->shipping_city,
-            'x_ship_to_zip'            => $order->shipping_postcode,
-            'x_ship_to_state'          => $order->shipping_state,
-            
-             );
-         return $authorizeaim_args;
+        $sale_request = array(
+          'mid'      => $this->merchant_id,
+          'terminal' => array(
+            'tid' => $this->terminal_id,
+            'terminal_type' => 'com.givepay.terminal-types.ecommerce'
+          ),
+          'amount' => array(
+            'base_amount' => floatval($order->get_total()) * 100
+          ),
+          'card' => array(
+            'card_number' => $_POST['gpg_pan'],
+            'card_present' => false,
+            'expiration_month' => $_POST['gpg_exp_month'],
+            'expiration_year' => $_POST['gpg_exp_year'],
+            'cvv' => $_POST['gpg_cvv']
+          ),
+          'payer' => array(
+            'billing_address' => array(
+              'line_1' => $order->get_billing_address_1(),
+              'line_2' => $order->get_billing_address_2(),
+              'city' => $order->get_billing_city(),
+              'state' => $order->get_billing_state(),
+              'postal_code' => $order->get_billing_postcode()
+            ),
+            'email_address' => $order->get_billing_email(),
+            'phone_number'  => $order->get_billing_phone()
+          )
+        );
+        return $sale_request;
       }
-      
    }
    /**
     * Add this Gateway to WooCommerce
@@ -319,4 +381,15 @@ function woocommerce_gpg_init() {
       return $methods;
    }
    add_filter('woocommerce_payment_gateways', 'woocommerce_add_gpg' );
+}
+
+
+if ( ! function_exists('write_log')) {
+   function write_log ( $log )  {
+      if ( is_array( $log ) || is_object( $log ) ) {
+         error_log( print_r( $log, true ) );
+      } else {
+         error_log( $log );
+      }
+   }
 }
