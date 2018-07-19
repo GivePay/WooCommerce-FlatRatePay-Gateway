@@ -142,19 +142,19 @@ function woocommerce_gpg_init() {
         global $woocommerce;
 
         if (!$this->isCreditCardNumber($_POST['gpg_pan'])) {
-           $woocommerce->add_error(__('(Credit Card Number) is not valid.', 'wc-givepay-gateway')); 
+           wc_add_notice(__('(Credit Card Number) is not valid.', 'wc-givepay-gateway'), 'error'); 
         }
 
         if (!$this->isCorrectExpireDate($_POST['gpg_exp_year'])) {
-           $woocommerce->add_error(__('(Card Expiry Date) is not valid.', 'wc-givepay-gateway')); 
+           wc_add_notice(__('(Card Expiry Date) is not valid.', 'wc-givepay-gateway')); 
         }  
 
         if (!$this->isCorrectExpireDate($_POST['gpg_exp_month'])) {
-           $woocommerce->add_error(__('(Card Expiry Date) is not valid.', 'wc-givepay-gateway')); 
+           wc_add_notice(__('(Card Expiry Date) is not valid.', 'wc-givepay-gateway')); 
         } 
 
         if (!$this->isCCVNumber($_POST['gpg_cvv'])) {
-           $woocommerce->add_error(__('(Card Verification Number) is not valid.', 'wc-givepay-gateway')); 
+           wc_add_notice(__('(Card Verification Number) is not valid.', 'wc-givepay-gateway')); 
         }
       }
       
@@ -291,7 +291,10 @@ function woocommerce_gpg_init() {
           $order->add_order_note($this->failed_message);
           $order->update_status('failed');
 
-          $woocommerce->add_error(__('(Transaction Error) Error processing payment.', 'wc-givepay-gateway')); 
+          $error_message = $sale_response->error->message;
+          $code = $sale_response->error->code;
+
+          wc_add_notice(__('(Transaction Error) Error processing payment: ' . $error_message, 'wc-givepay-gateway'), 'error'); 
         }
       }
 
