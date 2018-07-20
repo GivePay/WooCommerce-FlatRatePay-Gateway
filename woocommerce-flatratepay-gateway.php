@@ -161,7 +161,7 @@ function woocommerce_gpg_init() {
                 echo '<label style="margin-right:89px; line-height:40px;">CVV :</label> <input type="text" name="gpg_cvv"  maxlength=4 style="width:60px;" /><br/>';
 
                 // Show test card populate buttons if in debug mode
-                if ($this->mode == true) {
+                if ($this->mode == 'true') {
                     ?>
                     <p>Test Cards (debug only):</p>
                     <button type="button" onclick='javascript:useVisa()'>Visa</button>
