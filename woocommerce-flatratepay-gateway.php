@@ -344,21 +344,29 @@ function woocommerce_gpg_init() {
 
             FRP_Gateway_Logger::debug("Starting access token request.");
 
-            $ch = curl_init(); // initiate curl object
+            // $ch = curl_init(); // initiate curl object
 
-            curl_setopt($ch, CURLOPT_HEADER, false); // set to 0 to eliminate header info from response
-            curl_setopt($ch, CURLOPT_URL, $token_url);
-            curl_setopt($ch, CURLOPT_POST, true); 
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $body);      
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Returns response data instead of TRUE(1)
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true); // uncomment this line if you get no gateway response.
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'Accept: application/x-www-form-urlencoded',
-                'Content-Length: ' . strlen($body)
-            ));
+            // curl_setopt($ch, CURLOPT_HEADER, false); // set to 0 to eliminate header info from response
+            // curl_setopt($ch, CURLOPT_URL, $token_url);
+            // curl_setopt($ch, CURLOPT_POST, true); 
+            // curl_setopt($ch, CURLOPT_POSTFIELDS, $body);      
+            // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Returns response data instead of TRUE(1)
+            // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true); // uncomment this line if you get no gateway response.
+            // curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            //     'Accept: application/x-www-form-urlencoded',
+            //     'Content-Length: ' . strlen($body)
+            // ));
              
-            $token_response = curl_exec($ch); // execute curl post and store results in $post_response
-            curl_close($ch);
+            // $token_response = curl_exec($ch); // execute curl post and store results in $post_response
+            // curl_close($ch);
+
+            $token_response = wp_safe_remote_post($token_url, array(
+                'body'    => $token_data,
+                'method'  => 'POST',
+                'headers' => array(
+                    'Authorization' => 'application/x-www-form-urlencoded'
+                )
+            ));
 
             FRP_Gateway_Logger::debug("Token request ended successfully: " . $token_response);
 
