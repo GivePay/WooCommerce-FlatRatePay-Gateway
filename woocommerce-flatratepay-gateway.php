@@ -269,6 +269,9 @@ function woocommerce_gpg_init() {
             $secret = $this->secret_key;
 
             $token = $this->get_oauth_token($token_url, $client_id, $secret);
+            if ($token == null) {
+                return;
+            }
 
             $sale_request = $this->generate_gpg_sale_params($order);
 
@@ -276,23 +279,19 @@ function woocommerce_gpg_init() {
 
             FRP_Gateway_Logger::info("Starting transactions for $" . $order->get_total());
 
-            $ch = curl_init(); // initiate curl object
-            curl_setopt($ch, CURLOPT_URL, $process_url . 'api/v1/transactions/sale');
-            curl_setopt($ch, CURLOPT_HEADER, false); // set to 0 to eliminate header info from response
-            curl_setopt($ch, CURLOPT_POST, true); 
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Returns response data instead of TRUE(1)
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $body); // use HTTP POST to send form data
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true); // uncomment this line if you get no gateway response.
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'Accept: application/json',
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $token,
-                'Content-Length: ' . strlen($body)
+            $post_response = wp_safe_remote_post($process_url . 'api/v1/transactions/sale', array(
+                'method'  => 'POST',
+                'body'    => $body,
+                'headers' => array(
+                    'Authorization' => 'Bearer ' . $token,
+                    'Content-Type'  => 'application/json',
+                    'Accept'        => 'application/json'
+                )
             ));
-            $post_response = curl_exec($ch); // execute curl post and store results in $post_response
-            curl_close($ch);
-            FRP_Gateway_Logger::debug("Transaction completed: " . $post_response);
-            $sale_response = json_decode($post_response);
+
+            FRP_Gateway_Logger::debug("Transaction completed");
+
+            $sale_response = json_decode($post_response['body']);
 
             if ($sale_response->success) {
                 $transaction_id = $sale_response->result->transaction_id;
@@ -318,6 +317,7 @@ function woocommerce_gpg_init() {
                 $error_message = $sale_response->error->message;
                 $code = $sale_response->error->code;
 
+                FRP_Gateway_Logger::debug("Sale reponse: " . var_export($sale_response, true));
                 FRP_Gateway_Logger::error("Payment failed.");
 
                 wc_add_notice(__('(Transaction Error) Error processing payment: ' . $error_message, 'wc-givepay-gateway'), 'error'); 
@@ -344,22 +344,6 @@ function woocommerce_gpg_init() {
 
             FRP_Gateway_Logger::debug("Starting access token request.");
 
-            // $ch = curl_init(); // initiate curl object
-
-            // curl_setopt($ch, CURLOPT_HEADER, false); // set to 0 to eliminate header info from response
-            // curl_setopt($ch, CURLOPT_URL, $token_url);
-            // curl_setopt($ch, CURLOPT_POST, true); 
-            // curl_setopt($ch, CURLOPT_POSTFIELDS, $body);      
-            // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Returns response data instead of TRUE(1)
-            // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true); // uncomment this line if you get no gateway response.
-            // curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            //     'Accept: application/x-www-form-urlencoded',
-            //     'Content-Length: ' . strlen($body)
-            // ));
-             
-            // $token_response = curl_exec($ch); // execute curl post and store results in $post_response
-            // curl_close($ch);
-
             $token_response = wp_safe_remote_post($token_url, array(
                 'body'    => $token_data,
                 'method'  => 'POST',
@@ -368,9 +352,17 @@ function woocommerce_gpg_init() {
                 )
             ));
 
-            FRP_Gateway_Logger::debug("Token request ended successfully: " . $token_response);
+            if ($token_response['response']['code'] !== 200) {
+                FRP_Gateway_Logger::debug('Token response status code was ' . $token_response['response']['code']);
+                FRP_Gateway_Logger::debug("Token request ended in failure: " . var_export($token_response, true));
+                FRP_Gateway_Logger::error("Gateway authorization failed. Check credentials.");
+                wc_add_notice(__('(Transaction Error) Error processing payment: ' . $error_message, 'wc-givepay-gateway'), 'error'); 
+                return null;
+            }
 
-            $token = json_decode($token_response);
+            FRP_Gateway_Logger::debug("Token request was a success: " . $token_response['body']);
+            $token = json_decode($token_response['body']);
+
             return $token->access_token;
         }
         
@@ -382,25 +374,25 @@ function woocommerce_gpg_init() {
             $sale_request = array(
                 'mid'      => $this->merchant_id,
                 'terminal' => array(
-                    'tid' => $this->terminal_id,
+                    'tid'           => $this->terminal_id,
                     'terminal_type' => 'com.givepay.terminal-types.ecommerce'
                 ),
                 'amount' => array(
                     'base_amount' => floatval($order->get_total()) * 100
                 ),
                 'card' => array(
-                    'card_number' => $_POST['gpg_pan'],
-                    'card_present' => false,
+                    'card_number'      => $_POST['gpg_pan'],
+                    'card_present'     => false,
                     'expiration_month' => $_POST['gpg_exp_month'],
-                    'expiration_year' => $_POST['gpg_exp_year'],
-                    'cvv' => $_POST['gpg_cvv']
+                    'expiration_year'  => $_POST['gpg_exp_year'],
+                    'cvv'              => $_POST['gpg_cvv']
                 ),
                 'payer' => array(
                     'billing_address' => array(
-                        'line_1' => $order->get_billing_address_1(),
-                        'line_2' => $order->get_billing_address_2(),
-                        'city' => $order->get_billing_city(),
-                        'state' => $order->get_billing_state(),
+                        'line_1'      => $order->get_billing_address_1(),
+                        'line_2'      => $order->get_billing_address_2(),
+                        'city'        => $order->get_billing_city(),
+                        'state'       => $order->get_billing_state(),
                         'postal_code' => $order->get_billing_postcode()
                     ),
                     'email_address' => $order->get_billing_email(),
