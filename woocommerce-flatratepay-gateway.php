@@ -159,6 +159,39 @@ function woocommerce_gpg_init() {
                 echo '<label style="margin-right:30px; line-height:40px;">Expiry (MM YY) :</label> <input type="text" placeholder="MM" style="width:60px; display: inline;" name="gpg_exp_month" maxlength="2" />';
                 echo '<input type="text" style="width:60px; display: inline;" name="gpg_exp_year" maxlength="2" placeholder="YY" /><br/>';
                 echo '<label style="margin-right:89px; line-height:40px;">CVV :</label> <input type="text" name="gpg_cvv"  maxlength=4 style="width:60px;" /><br/>';
+
+                // Show test card populate buttons if in debug mode
+                if ($this->mode == true) {
+                    ?>
+                    <p>Test Cards (debug only):</p>
+                    <button type="button" onclick='javascript:useVisa()'>Visa</button>
+                    <button type="button" onclick='javascript:useAmex()'>Amex</button>
+                    <button type="button" onclick='javascript:useMc()'>MC</button>
+                    <button type="button" onclick='javascript:useDiscover()'>Discover</button>
+
+                    <script>
+                        var populate = function (number, cvv) {
+                            jQuery('input[name="gpg_pan"]').val(number);
+                            jQuery('input[name="gpg_cvv"]').val(cvv);
+                            jQuery('input[name="gpg_exp_year"]').val(25);
+                            jQuery('input[name="gpg_exp_month"]').val(12);
+                        };
+
+                        var useVisa = function () {
+                            populate('4111111111111111', '123');
+                        };
+                        var useAmex = function () {
+                            populate('378282246310005', '1234');
+                        };
+                        var useMc = function () {
+                            populate('5111111111111118', '123');
+                        };
+                        var useDiscover = function () {
+                            populate('6011111111111117', '123');
+                        };
+                    </script>
+                    <?php
+                }
             }
         }
         
