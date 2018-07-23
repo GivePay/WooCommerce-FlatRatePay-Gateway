@@ -57,6 +57,7 @@ function woocommerce_gpg_init() {
             $this->method_title     = __('FlatRatePay', 'wc-givepay-gateway');
             $this->icon             = WP_PLUGIN_URL . "/" . plugin_basename(dirname(__FILE__)) . '/img/logo.png';
             $this->has_fields       = true;
+            $this->supports         = array( 'products', 'refunds' );
             $this->init_form_fields();
             $this->init_settings();
             $this->title            = $this->settings['title'];
@@ -248,7 +249,7 @@ function woocommerce_gpg_init() {
         }
 
         /*
-        * Check card 
+        * Check card
         */
         private function isCreditCardNumber($toCheck)
         {
@@ -335,7 +336,7 @@ function woocommerce_gpg_init() {
                 $order->add_order_note( __('FlatRatePay payment complete!', 'wc-givepay-gateway') );
                 $order->add_order_note( __('Transaction ID: ' . $transaction_id, 'wc-givepay-gateway') );
 
-                $order->payment_complete();
+                $order->payment_complete($transaction_id);
 
                 FRP_Gateway_Logger::info("Payment completed.");
 
@@ -357,10 +358,19 @@ function woocommerce_gpg_init() {
         function process_refund($order_id, $amount = null, $reason = '')
         {
             $order = new WC_Order( $order_id );
-            return array(
-                'result' => 'success',
-                'redirect' => $this->get_return_url( $order )
-            );
+
+            $transaction_id = $order->get_transaction_id();
+
+            $response = $this->client->voidTransaction( $transaction_id, $this->merchant_id, $this->terminal_id );
+
+            if ($response->getSuccess()) {
+                return array(
+                    'result' => 'success',
+                    'redirect' => $this->get_return_url( $order )
+                );
+            } else {
+                wc_add_notice(__('(Transaction Error) Error processing void: ' . $response->getErrorMessage(), 'wc-givepay-gateway'), 'error');
+            }
         }
     }
 

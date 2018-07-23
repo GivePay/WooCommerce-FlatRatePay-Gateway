@@ -49,8 +49,29 @@ class FRP_Gateway {
         return $this->makeSaleRequest( $access_token, $order, $merchant_id, $terminal_id );
     }
 
+
+    /**
+     * @param $transaction_id
+     * @param $merchant_id
+     * @param $terminal_id
+     * @throws Exception
+     * @return TransactionResult
+     */
+    public function voidTransaction( $transaction_id, $merchant_id, $terminal_id ) {
+        if ( NULL ==  $transaction_id ) {
+            throw new Exception( 'Transaction ID is null' );
+        }
+
+        $access_token = $this->getAccessToken( $this->client_id, $this->client_secret, $this->token_endpoint );
+        if ( NULL == $access_token ) {
+            throw new Exception( 'Could not authorize with gateway.' );
+        }
+
+        return $this->makeVoidRequest( $access_token, $transaction_id, $merchant_id, $terminal_id );
+    }
+
     private function makeSaleRequest( $access_token, $order, $merchant_id, $terminal_id ) {
-        $sale_request = $this->generate_gpg_sale_params($merchant_id, $terminal_id, $order);
+        $sale_request = $this->generateSalesRequest($merchant_id, $terminal_id, $order);
 
         $body = json_encode($sale_request);
 
@@ -82,6 +103,44 @@ class FRP_Gateway {
 
             FRP_Gateway_Logger::debug("Sale response: " . var_export($sale_response, true));
             FRP_Gateway_Logger::error("Payment failed.");
+
+            return new TransactionResult(false, NULL, $error_message, $code);
+        }
+    }
+
+    private function makeVoidRequest( $access_token, $transaction_id, $merchant_id, $terminal_id ) {
+        $void_request = $this->generateVoidRequest( $merchant_id, $terminal_id, $transaction_id );
+
+        $body = json_encode($void_request);
+
+        FRP_Gateway_Logger::info("Starting void transaction for transaction# " . $transaction_id);
+
+        $post_response = wp_safe_remote_post($this->gateway_url . 'api/v1/transactions/void', array(
+            'method'  => 'POST',
+            'body'    => $body,
+            'headers' => array(
+                'Authorization' => 'Bearer ' . $access_token,
+                'Content-Type'  => 'application/json',
+                'Accept'        => 'application/json'
+            )
+        ));
+
+        FRP_Gateway_Logger::debug("Transaction completed");
+
+        $void_response = json_decode($post_response['body']);
+
+        if ($void_response->success) {
+            $transaction_id = $void_response->result->transaction_id;
+
+            FRP_Gateway_Logger::info('Void completed. Transaction ID: ' . $transaction_id);
+
+            return new TransactionResult(true, $transaction_id);
+        } else {
+            $error_message = $void_response->error->message;
+            $code = $void_response->error->code;
+
+            FRP_Gateway_Logger::debug("Void response: " . var_export($void_response, true));
+            FRP_Gateway_Logger::error("Void failed.");
 
             return new TransactionResult(false, NULL, $error_message, $code);
         }
@@ -124,9 +183,9 @@ class FRP_Gateway {
     }
 
     /**
-     * Generate an Sale request
+     * Generate a vale request
      **/
-    private function generate_gpg_sale_params($merchant_id, $terminal_id, $order)
+    private function generateSalesRequest($merchant_id, $terminal_id, $order)
     {
         $sale_request = array(
             'mid'      => $merchant_id,
@@ -157,6 +216,26 @@ class FRP_Gateway {
             )
         );
         return $sale_request;
+    }
+
+    /**
+     * Generate a void request
+     * @param $merchant_id (string)
+     * @param $terminal_id (string)
+     * @param $transaction_id (string)
+     * @return array
+     **/
+    private function generateVoidRequest($merchant_id, $terminal_id, $transaction_id)
+    {
+        $refund_request = array(
+            'mid'      => $merchant_id,
+            'terminal' => array(
+                'tid'           => $terminal_id,
+                'terminal_type' => 'com.givepay.terminal-types.ecommerce'
+            ),
+            'transaction_id' => $transaction_id
+        );
+        return $refund_request;
     }
 }
 
