@@ -1,0 +1,15 @@
+{
+  "name": "givepay/flatratepay-woocommerce",
+  "description": "WooCommerce Extension for FlatRatePay",
+  "autoload": {
+    "psr-4": {
+      "FlatRatePay\\": "FlatRatePay/"
+    }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^6"
+  },
+  "require": {
+    "givepay/givepay-gateway": "^0.4.0"
+  }
+}

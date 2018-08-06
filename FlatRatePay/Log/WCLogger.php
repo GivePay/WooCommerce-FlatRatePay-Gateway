@@ -1,33 +1,18 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+namespace FlatRatePay\Log;
+
+use \Psr\Log\AbstractLogger;
+use \WC_Logger;
 
 /**
  * Logs using the WC_Logger
  */
-class FRP_Gateway_Logger {
+class WCLogger extends AbstractLogger {
 
 	public static $logger;
 
-	public static function debug( $message ) {
-		self::log( $message, WC_Log_Levels::DEBUG );
-	}
-
-	public static function info( $message ) {
-		self::log( $message, WC_Log_Levels::INFO );
-	}
-
-	public static function warn( $message ) {
-		self::log( $message, WC_Log_Levels::WARNING );
-	}
-
-	public static function error( $message ) {
-		self::log( $message, WC_Log_Levels::ERROR );
-	}
-
-	static function log( $message, $level ) {
+	public function log($level, $message, array $context = array()) {
 		if ( self::should_skip() ) {
 			return;
 		}

@@ -1,4 +1,7 @@
-script: zip woocommerce-flatratepay-gateway.zip woocommerce-flatratepay-gateway.php include/ img/ readme.txt LICENSE
+language: php
+before_script:
+  - composer install --no-dev
+script: zip woocommerce-flatratepay-gateway.zip woocommerce-flatratepay-gateway.php FlatRatePay/ vendor/ img/ readme.txt LICENSE
 deploy:
   provider: releases
   skip_clean: true
