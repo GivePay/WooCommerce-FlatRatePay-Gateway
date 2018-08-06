@@ -421,7 +421,7 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
 		);
 
 		if ( isset( $_POST['wc-givepay_gateway-payment-token'] ) AND 'new' == $_POST['wc-givepay_gateway-payment-token'] ) {
-			$token = $this->client->storeCard( $this->merchant_id, $this->terminal_id, $card_info );
+			$token = $this->client->storeCard( $this->merchant_id, $this->terminal_id, $card );
 			$this->save_payment_token( $token, $card_info );
 			$card = Card::withToken($token);
 
@@ -477,6 +477,14 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
 		}
 	}
 
+	/**
+	 * @param int $order_id
+	 * @param null $amount
+	 * @param string $reason
+	 *
+	 * @return array|bool
+	 * @throws \Exception
+	 */
 	function process_refund( $order_id, $amount = null, $reason = '' ) {
 		$order = new WC_Order( $order_id );
 
