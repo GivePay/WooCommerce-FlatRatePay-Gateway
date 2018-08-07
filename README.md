@@ -1,5 +1,7 @@
 # WooCommerce FlatRatePay Gateway
 
+<img src="https://github.com/GivePay/WooCommerce-FlatRatePay-Gateway/raw/master/img/logo.png" width=250/>
+
 ## Description
 
 FlatRatePay™ is a financial services technology company focused on the development and promotion of unique e-Commerce and retail commerce solutions to help merchants and resellers grow through price, technology, and relationships.
