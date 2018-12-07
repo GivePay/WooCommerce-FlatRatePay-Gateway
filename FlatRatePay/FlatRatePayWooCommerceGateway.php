@@ -56,7 +56,7 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
 	public function __construct() {
 		$this->id           = 'givepay_gateway';
 		$this->method_title = __( 'FlatRatePay', 'wc-givepay-gateway' );
-		$this->icon         = WP_PLUGIN_URL . "/" . plugin_basename( dirname( __FILE__ ) ) . '/../img/logo.png';
+		$this->icon         = WP_PLUGIN_URL . "/" . plugin_basename( dirname( __FILE__ ) ) . '/img/logo.png';
 		$this->has_fields   = true;
 		$this->supports     = array(
 			'products',
