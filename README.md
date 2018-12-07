@@ -1,6 +1,6 @@
 # WooCommerce FlatRatePay Gateway
 
-<img src="https://github.com/GivePay/WooCommerce-FlatRatePay-Gateway/raw/master/img/logo.png" width=250/>
+<img src="https://github.com/GivePay/WooCommerce-FlatRatePay-Gateway/raw/master/FlatRatePay/img/logo.png" width=250/>
 
 ## Description
 
