@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a4a9ed8d84781a84189c16f5abb4143c",
+    "content-hash": "d3544158751b4d92fb88d66ded4d799e",
     "packages": [
         {
             "name": "givepay/givepay-gateway",
-            "version": "v0.7",
+            "version": "v0.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/GivePay/GivePayGateway-php.git",
-                "reference": "107f507b27efea38718461702f0d95b4b34bc254"
+                "reference": "f6f991b40880006832cbdedb02dfd8371d4cd115"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/GivePay/GivePayGateway-php/zipball/107f507b27efea38718461702f0d95b4b34bc254",
-                "reference": "107f507b27efea38718461702f0d95b4b34bc254",
+                "url": "https://api.github.com/repos/GivePay/GivePayGateway-php/zipball/f6f991b40880006832cbdedb02dfd8371d4cd115",
+                "reference": "f6f991b40880006832cbdedb02dfd8371d4cd115",
                 "shasum": ""
             },
             "require": {
@@ -41,7 +41,7 @@
                 "GPL-3.0-or-later"
             ],
             "description": "A library for interacting with FlatRatePay",
-            "time": "2019-01-16T20:11:43+00:00"
+            "time": "2019-01-30T00:40:01+00:00"
         },
         {
             "name": "psr/log",
