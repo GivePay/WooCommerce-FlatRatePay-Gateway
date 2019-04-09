@@ -10,17 +10,18 @@ namespace FlatRatePay;
 
 require_once( __DIR__ . '/../vendor/autoload.php' );
 
-use \GivePay\Gateway\Transactions\Card;
-use \GivePay\Gateway\Transactions\Sale;
-use \GivePay\Gateway\Transactions\Address;
-use \FlatRatePay\Log\WCLogger;
-use \GivePay\Gateway\GivePayGatewayClient;
-use \GivePay\Gateway\Transactions\TerminalType;
-use \Psr\Log\LoggerInterface;
-use \WC_Payment_Gateway_CC;
-use \WC_Payment_Token_CC;
-use \WC_Payment_Tokens;
-use \WC_Order;
+use FlatRatePay\Log\WCLogger;
+use GivePay\Gateway\GivePayGatewayClient;
+use GivePay\Gateway\Transactions\Address;
+use GivePay\Gateway\Transactions\Card;
+use GivePay\Gateway\Transactions\Order;
+use GivePay\Gateway\Transactions\Sale;
+use GivePay\Gateway\Transactions\TerminalType;
+use Psr\Log\LoggerInterface;
+use WC_Order;
+use WC_Payment_Gateway_CC;
+use WC_Payment_Token_CC;
+use WC_Payment_Tokens;
 
 /**
  * GivePay Gateway class
@@ -191,11 +192,14 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
 
 		if ( empty( $this->public_key ) ) : ?>
             <div class="simplify-commerce-banner updated">
-                <img src="<?php echo WP_PLUGIN_URL . "/" . plugin_basename( dirname( __FILE__ ) ) . '/../img/logo.png'; ?>" />
+                <img src="<?php echo WP_PLUGIN_URL . "/" . plugin_basename( dirname( __FILE__ ) ) . '/../img/logo.png'; ?>"/>
                 <p class="main"><strong><?php _e( 'Get started', 'wc-givepay-gateway' ); ?></strong></p>
                 <p><?php _e( 'FlatRatePay is a merchant services provider made for businesses. Sign up with FlatRatePay to get low rates and great customer support!', 'wc-givepay-gateway' ); ?></p>
 
-                <p><a href="https://portal.flatratepay.com/merchants/new?promo=WC_WP" target="_blank" class="button button-primary"><?php _e( 'Sign up for FlatRatePay', 'wc-givepay-gateway' ); ?></a> <a href="https://flatratepay.com/?utm_source=WooCommerce" target="_blank" class="button"><?php _e( 'Learn more', 'wc-givepay-gateway' ); ?></a></p>
+                <p><a href="https://portal.flatratepay.com/merchants/new?promo=WC_WP" target="_blank"
+                      class="button button-primary"><?php _e( 'Sign up for FlatRatePay', 'wc-givepay-gateway' ); ?></a>
+                    <a href="https://flatratepay.com/?utm_source=WooCommerce" target="_blank"
+                       class="button"><?php _e( 'Learn more', 'wc-givepay-gateway' ); ?></a></p>
 
             </div>
 		<?php
@@ -218,7 +222,7 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
 
 		$number = preg_replace( '/[^0-9]+/', '', $_POST['givepay_gateway-card-number'] );
 
-		$date_string = preg_replace( '/[^0-9\/]+/', '',  $_POST['givepay_gateway-card-expiry'] );
+		$date_string  = preg_replace( '/[^0-9\/]+/', '', $_POST['givepay_gateway-card-expiry'] );
 		$expiry_dates = explode( '/', $date_string, 2 );
 		if ( sizeof( $expiry_dates ) != 2 ) {
 			wc_add_notice( __( '(Card Expiry Date) is not valid.', 'wc-givepay-gateway' ) );
@@ -240,7 +244,7 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
 
 		$card = $this->get_card_from_request();
 
-		if ( NULL !== $card['token_id'] ) {
+		if ( null !== $card['token_id'] ) {
 			return;
 		}
 
@@ -319,11 +323,11 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
 	 *
 	 * Gateways which support tokenization do not require names - we don't want the data to post to the server.
 	 *
-	 * @since  2.6.0
-	 *
-	 * @param  string $name
+	 * @param string $name
 	 *
 	 * @return string
+	 * @since  2.6.0
+	 *
 	 */
 	public function field_name( $name ) {
 		return ' name="' . esc_attr( $this->id . '-' . $name ) . '" ';
@@ -344,7 +348,7 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
 	public function add_payment_method() {
 		$card = $this->get_card_from_request();
 
-		var_dump($_POST);
+		var_dump( $_POST );
 	}
 
 	/**
@@ -358,9 +362,9 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
 	private function save_payment_token( $token, $card ) {
 		$p_token = new WC_Payment_Token_CC();
 
-		$p_token->set_token($token);
-		$p_token->set_card_type('visa');
-		$p_token->set_last4( substr( $card['card_number'], -4 ) );
+		$p_token->set_token( $token );
+		$p_token->set_card_type( 'visa' );
+		$p_token->set_last4( substr( $card['card_number'], - 4 ) );
 		$p_token->set_gateway_id( $this->id );
 		$p_token->set_expiry_month( $card['expiration_month'] );
 		$p_token->set_expiry_year( '20' . $card['expiration_year'] );
@@ -381,7 +385,7 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
 	 * @return WC_Payment_Token_CC
 	 */
 	private function get_user_token( $token_id ) {
-		$customer_token  = null;
+		$customer_token = null;
 		if ( is_user_logged_in() ) {
 			$tokens = WC_Payment_Tokens::get_customer_tokens( get_current_user_id() );
 			foreach ( $tokens as $token ) {
@@ -391,6 +395,7 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
 				}
 			}
 		}
+
 		return $customer_token;
 	}
 
@@ -398,9 +403,10 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
 	 * Process the payment and return the result
 	 *
 	 * @param int $order_id
-	 * @throws \Exception
+	 *
 	 * @return array
-	 **/
+	 **@throws \Exception
+	 */
 	function process_payment( $order_id ) {
 		global $woocommerce;
 		$order = new WC_Order( $order_id );
@@ -409,11 +415,12 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
 		} else if ( ! wc_checkout_is_https() ) {
 			$this->logger->warning( "production mode not over TLS" );
 			wc_add_notice( __( 'Live mode requires SSL/TLS', 'wc-givepay-gateway' ), 'error' );
+
 			return;
 		}
 
 		$card_info = $this->get_card_from_request();
-		$card = Card::withCard(
+		$card      = Card::withCard(
 			$card_info['card_number'],
 			$card_info['cvv'],
 			$card_info['expiration_month'],
@@ -423,17 +430,17 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
 		if ( isset( $_POST['wc-givepay_gateway-payment-token'] ) AND 'new' == $_POST['wc-givepay_gateway-payment-token'] ) {
 			$token = $this->client->storeCard( $this->merchant_id, $this->terminal_id, $card );
 			$this->save_payment_token( $token, $card_info );
-			$card = Card::withToken($token);
+			$card = Card::withToken( $token );
 
-		} else if ( isset( $_POST['wc-givepay_gateway-payment-token'] ) AND 'new' !== $_POST['wc-givepay_gateway-payment-token']) {
+		} else if ( isset( $_POST['wc-givepay_gateway-payment-token'] ) AND 'new' !== $_POST['wc-givepay_gateway-payment-token'] ) {
 			$token = $this->get_user_token( $card_info['token_id'] );
 
-			if ( NULL !== $token ) {
-				$card = Card::withToken($token->get_token());
+			if ( null !== $token ) {
+				$card = Card::withToken( $token->get_token() );
 			}
 		}
 
-		$sale_response = $this->client->chargeAmount($this->merchant_id, $this->terminal_id, new Sale(
+		$sale_response = $this->client->chargeAmount( $this->merchant_id, $this->terminal_id, new Sale(
 			$order->get_total(),
 			TerminalType::$ECommerce,
 			new Address(
@@ -445,8 +452,9 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
 			),
 			$order->get_billing_email(),
 			$order->get_billing_phone(),
-			$card
-		));
+			$card,
+			new Order( $order->get_order_number() )
+		) );
 
 		$this->logger->debug( "Transaction completed" );
 
