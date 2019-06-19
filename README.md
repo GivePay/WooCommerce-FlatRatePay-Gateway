@@ -41,3 +41,7 @@ A little bit. You will have to be compliant with PCI-DSS SAQ A-EP, which is the 
 *1.0*
 
 * Initial release
+
+*1.1*
+
+* Add client-side tokenization: No more SAQ D!
