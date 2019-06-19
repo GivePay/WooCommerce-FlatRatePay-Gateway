@@ -24,13 +24,17 @@ When you have successfully run a test transaction using on of the provided test 
 
 ## Frequently Asked Questions
 
-> Do I need a FlatRatePay account to use this plugin?
+__Do I need a FlatRatePay account to use this plugin?__
 
 Yes! Simply go to [https://portal.flatratepay.com/merchants/new](https://portal.flatratepay.com/merchants/new?promo=WPWOO) to sign up!
 
-> What does this plugin cost?
+__What does this plugin cost?__
 
 WooCommerce FlatRatePay Gateway is completely free!
+
+__Do I have to be PCI compliant?__
+
+A little bit. You will have to be compliant with PCI-DSS SAQ A-EP, which is the level of compliance required for e-commerce merchant which offload all PCI requirements to a third-party.
 
 ## Changelog
 
