@@ -10,6 +10,6 @@
     "phpunit/phpunit": "^6"
   },
   "require": {
-    "givepay/givepay-gateway": "^0.11.0"
+    "givepay/givepay-gateway": "^0.12.0"
   }
 }

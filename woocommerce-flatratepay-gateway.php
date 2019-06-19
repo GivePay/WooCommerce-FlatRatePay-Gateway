@@ -2,7 +2,7 @@
 /*
 Plugin Name: FlatRatePay Payment Gateway For WooCommerce
 Description: Extends WooCommerce to Process Payments with the GivePay Gateway
-Version: 1.0.0
+Version: 0.12
 Plugin URI: https://flatratepay.com/
 Author: Ishan Verma, GivePay Commerce, LLC
 Author URI: https://flatratepay.com/
@@ -34,6 +34,8 @@ final class WC_GPG_Loader {
 		if ( ! class_exists( 'WC_Payment_Gateway_CC' ) ) {
 			return;
 		}
+
+		require_once( __DIR__ . '/vendor/autoload.php' );
 
 		require_once( __DIR__ . '/FlatRatePay/FlatRatePayWooCommerceGateway.php' );
 
