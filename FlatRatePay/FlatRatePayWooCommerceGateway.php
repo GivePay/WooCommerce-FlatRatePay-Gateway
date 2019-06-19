@@ -62,6 +62,7 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
 			'refunds',
 			'tokenization',
 			'default_credit_card_form',
+            'credit_card_form_cvc_on_saved_method'
 		);
 		$this->init_form_fields();
 		$this->init_settings();
@@ -157,13 +158,6 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
 				'type'        => 'select',
 				'options'     => array( 'false' => 'Live Mode', 'true' => 'Test/Sandbox Mode' ),
 				'description' => "Live/Test Mode"
-			),
-			'pci_mode'        => array(
-				'title'       => __( 'PCI Mode' ),
-				'type'        => 'select',
-				'options'     => array( self::PCI_MODE_OFFLOAD => 'Offload', self::PCI_MODE_DIRECT => 'Direct' ),
-				'description' => 'The mode in which the gateway operates',
-				'default'     => self::PCI_MODE_OFFLOAD,
 			)
 		);
 

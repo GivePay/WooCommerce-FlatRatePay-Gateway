@@ -1,12 +1,13 @@
 <?php
-/*
-Plugin Name: FlatRatePay Payment Gateway For WooCommerce
-Description: Extends WooCommerce to Process Payments with the GivePay Gateway
-Version: 0.12
-Plugin URI: https://flatratepay.com/
-Author: Ishan Verma, GivePay Commerce, LLC
-Author URI: https://flatratepay.com/
-License: Under GPL2
+/**
+* Plugin Name: FlatRatePay Payment Gateway For WooCommerce
+* Description: Extends WooCommerce to Process Payments with the GivePay Gateway
+* Version: 0.12
+* Plugin URI: https://flatratepay.com/
+* Author: William Ward, GivePay Commerce, LLC
+* Author URI: https://flatratepay.com/
+* License: Under GPL2
+* WC tested up to: 3.6.4
 */
 
 if ( ! defined( 'ABSPATH' ) ) {
