@@ -233,7 +233,7 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
         <script>
             const gpgMid = "<?php echo esc_js( $this->merchant_id ) ?>";
             const gpgAccessToken = "<?php echo esc_js( $this->client->getTokenizationApiKey() ) ?>";
-            const gpgUrl = "<?php echo $this->mode == 'true' ? esc_js( self::TEST_URL . 'api/v1/transactions/tokenize' ) : "undefined" ?>";
+            const gpgUrl = <?php echo $this->mode == 'true' ? '"' . esc_js( self::TEST_URL . 'api/v1/transactions/tokenize' ) . '"' : "undefined" ?>;
         </script>
 		<?php
 	}
