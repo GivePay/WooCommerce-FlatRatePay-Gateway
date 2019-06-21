@@ -1,7 +1,10 @@
 language: php
 before_script:
   - composer install --no-dev
-script: zip -r woocommerce-flatratepay-gateway.zip woocommerce-flatratepay-gateway.php FlatRatePay/ vendor/ img/ readme.txt LICENSE
+  - npm install
+script:
+  - npm run prod
+  - zip -r woocommerce-flatratepay-gateway.zip woocommerce-flatratepay-gateway.php FlatRatePay/ vendor/ img/ readme.txt LICENSE
 deploy:
   provider: releases
   skip_cleanup: true

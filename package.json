@@ -1,0 +1,33 @@
+{
+  "name": "woocommerce-flatratepay-gateway",
+  "version": "1.0.0",
+  "description": "<img src=\"https://github.com/GivePay/WooCommerce-FlatRatePay-Gateway/raw/master/FlatRatePay/img/logo.png\" width=250/>",
+  "main": "FlatRatePay/assets/js/flatratepay.js",
+  "private": true,
+  "scripts": {
+    "dev": "webpack --watch --config webpack.dev.js",
+    "prod": "webpack --config webpack.prod.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GivePay/WooCommerce-FlatRatePay-Gateway.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GivePay/WooCommerce-FlatRatePay-Gateway/issues"
+  },
+  "homepage": "https://github.com/GivePay/WooCommerce-FlatRatePay-Gateway#readme",
+  "devDependencies": {
+    "clean-webpack-plugin": "^3.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "webpack": "^4.35.0",
+    "webpack-cli": "^3.3.4",
+    "webpack-merge": "^4.2.1"
+  },
+  "dependencies": {
+    "jquery": "^3.4.1",
+    "lodash": "^4.17.11"
+  }
+}

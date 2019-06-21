@@ -1,3 +1,7 @@
+import jQuery from 'jquery';
+import _ from 'lodash';
+import GivePayGateway from './gateway.js';
+
 /**
  * GivePay PAN Utils
  *
@@ -49,7 +53,7 @@
      **/
     $.fn.onValidPan = function(cb, panSelector, expSelector) {
 
-        let eval = function () {
+        let evaluate = function () {
             let pan = $(panSelector).val().replace(/[^0-9]/gi, '');
             let expMonth = undefined;
             let expYear = undefined;
@@ -75,7 +79,7 @@
             }
         };
 
-        let _cb = _.debounce(eval, 500);
+        let _cb = _.debounce(evaluate, 500);
 
         $(this).on('input propertychange paste', panSelector, _cb);
 
@@ -87,7 +91,7 @@
 
 (function($) {
     let _$checkoutForm = $('form[name="checkout"]');
-    let _client = GivePayGateway.createClient(gpgMid, gpgAccessToken, gpgUrl);
+    let _client = GivePayGateway(gpgMid, gpgAccessToken, gpgUrl);
 
     const tokenName = 'givepay_gateway-gpg-token';
     const panName = 'givepay_gateway-card-number-last4';

@@ -1,14 +1,8 @@
-let GivePayGateway = function() {
+import jQuery from 'jquery';
 
-    let _createClient = function (mid, token, url) {
-        return _gateway(mid, token, url);
-    };
-
-    return {
-        createClient: _createClient
-    };
-
-}();
+export default function GivePayGateway(mid, token, url) {
+    return _gateway(mid, token, url);
+};
 
 let _gateway = function(mid, token, url) {
     let _preValidateRequest = function () {

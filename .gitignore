@@ -3,3 +3,5 @@
 /vendor
 /composer.phar
 /woocommerce-flatratepay-gateway.zip
+/FlatRatePay/assets/js/dist
+/node_modules
