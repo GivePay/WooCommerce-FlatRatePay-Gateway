@@ -45,3 +45,7 @@ A little bit. You will have to be compliant with PCI-DSS SAQ A-EP, which is the 
 *1.1*
 
 * Add client-side tokenization: No more SAQ D!
+
+*1.2*
+
+* Add support for IE 11

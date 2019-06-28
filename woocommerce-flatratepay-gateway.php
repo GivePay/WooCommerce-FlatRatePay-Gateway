@@ -2,7 +2,7 @@
 /**
 * Plugin Name: FlatRatePay Payment Gateway For WooCommerce
 * Description: Extends WooCommerce to Process Payments with the GivePay Gateway
-* Version: 1.1
+* Version: 1.2
 * Plugin URI: https://flatratepay.com/
 * Author: William Ward, GivePay Commerce, LLC
 * Author URI: https://flatratepay.com/
