@@ -49,3 +49,7 @@ A little bit. You will have to be compliant with PCI-DSS SAQ A-EP, which is the 
 *1.2*
 
 * Add support for IE 11
+
+*1.2.1*
+
+* Fix queueing location of FRP JS in tokenization
