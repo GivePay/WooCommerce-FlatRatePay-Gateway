@@ -221,7 +221,8 @@ class FlatRatePayWooCommerceGateway extends WC_Payment_Gateway_CC {
 			'givepay-tokenization-form',
 			WP_PLUGIN_URL . "/" . plugin_basename( dirname( __FILE__ ) ) . '/assets/js/dist/flatratepay.js',
 			array(),
-			WC()->version
+			WC()->version,
+            true
 		);
 	}
 
